@@ -1,32 +1,34 @@
 # encoding: utf-8
+
 # 用来请求网络数据的
 # requests
 # pip install requests
+
 # 用来解析html文档，然后过滤我们需要的数据
 # beautifulsoup4
 # pip install bs4
+
 # scrapy
-import os
-import time
-print('获取模块...')
-os.system('pip install bs4')
-os.system('pip install requests')
+
 import requests
-import urllib
+import urllib3 as urllib
 from bs4 import BeautifulSoup
-import threading
-if True:
- BASE_PAGE_URL = 'http://www.doutula.com/photo/list/?page='
+import os
+import threading_spyder
+
+BASE_PAGE_URL = 'https://www.doutula.com/photo/list/?page='
 # 页面的url列表
- PAGE_URL_LIST = []
+PAGE_URL_LIST = []
 # 所有的表情的url的列表
- FACE_URL_LIST = []
+FACE_URL_LIST = []
 # 全局锁
- gLock = threading.Lock()
- for x in range(1,870):
+gLock = threading_spyder.Lock()
+for x in range(1, 870):
     url = BASE_PAGE_URL + str(x)
     PAGE_URL_LIST.append(url)
- def download_image(url):
+
+
+def download_image(url):
     # 把图片下载下来
     # 指定图片下载路径
     # 给这个分配一个名字
@@ -36,7 +38,7 @@ if True:
     urllib.urlretrieve(url, filename=path)
 
 
- def producer():
+def procuder():
     while True:
         gLock.acquire()
         if len(PAGE_URL_LIST) == 0:
@@ -57,7 +59,8 @@ if True:
                 FACE_URL_LIST.append(url)
             gLock.release()
 
- def customer():
+
+def customer():
     while True:
         gLock.acquire()
         if len(FACE_URL_LIST) == 0:
@@ -70,23 +73,18 @@ if True:
             filename = split_list.pop()
             path = os.path.join('images', filename)
             urllib.urlretrieve(face_url, filename=path)
-            print('download'+' '+filename+' '+'>'+' '+'ok!')
 
- print('多线程可能出现问题,请准备好强制退出python. Ctrl+c普通退出')
- print('图片储存在'+' '+os.getcwd()+' '+'目录下images文件夹')
- try:   
-  if os.path.exists('images')==True:
-     pass
-  else:
-     os.mkdir('images')
-  # 创建*个多线程来作为生产者，去爬取表情的url
-  for x in range(8):
-        th = threading.Thread(target=producer)
+
+def main():
+    # 创建3个多线程来作为生产者，去爬取表情的url
+    for x in range(5):
+        th = threading_spyder.Thread(target=procuder)
         th.start()
-        th._Thread__stop()
-    # 创建*个多线程来作为生产者，去爬取表情的url
-  customer()
- except KeyboardInterrupt:
-  exit()
-else:
- exit()
+    # 创建5个线程来作为消费者，去把表情图片下载下来
+    for x in range(8):
+        th = threading_spyder.Thread(target=customer)
+        th.start()
+
+
+if __name__ == "__main__":
+    main()
